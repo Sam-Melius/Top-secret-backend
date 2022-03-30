@@ -16,21 +16,36 @@ describe('Top-secret-backend routes', () => {
   it('creates a user', async () => {
     const res = await request(app)
       .post('/api/v1/auth/signup')
-      .send({ username: 'Wally', password: 'souvenir', });
+      .send({ email: 'Wally', password: 'souvenir', });
 
-    expect(res.body).toEqual({ id: expect.any(String), username: 'Wally' });
+    expect(res.body).toEqual({ id: expect.any(String), email: 'Wally' });
   });
 
   it('signs in a user', async () => {
     const user = await UserService.create({
-      username: 'Wally',
+      email: 'Wally',
       password: 'souvenir'
     });
     const res = await request(app)
       .post('/api/v1/auth/signin')
-      .send({ username: 'Wally', password: 'souvenir' });
+      .send({ email: 'Wally', password: 'souvenir' });
 
     expect(res.body).toEqual({ user });
+  });
+
+  it('logout a user', async () => {
+    let user = await UserService.create({
+      email: 'Wally',
+      password: 'souvenir'
+    });
+    user = await UserService.signIn({
+      email: 'Wally',
+      password: 'souvenir'
+    });
+    const res = await request(app)
+      .delete('/api/v1/auth/sessions').send(user);
+
+    expect(res.body).toEqual({ success: true, message: 'Signed out' });
   });
 
 });
